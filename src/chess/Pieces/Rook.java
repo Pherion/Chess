@@ -20,6 +20,10 @@ public class Rook extends Piece {
         super(position, PieceType.rook, color, gameInfo);
     }
 
+    public Rook(Rook toCopy, GameInfoWrapper gameInfo) {
+        super(toCopy, gameInfo);
+    }
+
     @Override
     public boolean validateMove(Position position) {
         // calculate the changes

@@ -26,6 +26,10 @@ public class Queen extends Piece {
         super(position, PieceType.queen, color, gameInfo);
     }
 
+    public Queen(Queen toCopy, GameInfoWrapper gameInfo) {
+        super(toCopy, gameInfo);
+    }
+
     @Override
     public boolean validateMove(Position position) {
         // calculate the changes

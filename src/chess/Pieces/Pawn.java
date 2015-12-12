@@ -22,6 +22,10 @@ public class Pawn extends Piece {
         super(position, PieceType.pawn, color, gameInfo);
     }
 
+    public Pawn(Pawn toCopy, GameInfoWrapper gameInfo) {
+        super(toCopy, gameInfo);
+    }
+
     @Override
     public boolean validateMove(Position position) {
         // change in position

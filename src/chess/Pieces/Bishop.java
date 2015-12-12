@@ -20,6 +20,10 @@ public class Bishop extends Piece {
         super(position, PieceType.bishop, color, gameInfo);
     }
 
+    public Bishop(Bishop toCopy, GameInfoWrapper gameInfo) {
+        super(toCopy, gameInfo);
+    }
+
     @Override
     public boolean validateMove(Position position) {
         // calculate the changes

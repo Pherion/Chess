@@ -30,7 +30,16 @@ public abstract class Piece {
         this.type = type;
         this.gameInfo = gameInfo;
     }
-    
+
+    public Piece(Piece toCopy, GameInfoWrapper gameInfo) {
+        this.gameInfo = gameInfo;
+        color = toCopy.color;
+        position = new Position(toCopy.position);
+        captured = toCopy.captured;
+        type = toCopy.type;
+        moved = toCopy.moved;
+    }
+
     /**
      * Verifies if the provided position is a valid move for the given piece.
      * The assumption is made that the provided position is a position within

@@ -26,6 +26,21 @@ public class Move {
     private Position startPositionTwo;
     private Position endPositionTwo;
 
+    /**
+     * Copy Constructor
+     *
+     * @param toCopy Move to copy
+     */
+    public Move(Move toCopy) {
+        moveColor = toCopy.moveColor;
+        type = toCopy.type;
+        startPosition = new Position(toCopy.startPosition);
+        endPosition = new Position(toCopy.endPosition);
+        typeTwo = toCopy.typeTwo;
+        startPositionTwo = new Position(toCopy.startPositionTwo);
+        endPositionTwo = new Position(toCopy.endPositionTwo);
+    }
+
     public boolean isMoveColor() {
         return moveColor;
     }

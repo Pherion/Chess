@@ -27,6 +27,10 @@ public class King extends Piece {
     public King(Position position, boolean color, GameInfoWrapper gameInfo) {
         super(position, PieceType.king, color, gameInfo);
     }
+
+    public King(King toCopy, GameInfoWrapper gameInfo) {
+        super(toCopy, gameInfo);
+    }
     
     @Override
     public List<Position> getValidMoves() {
