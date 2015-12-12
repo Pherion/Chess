@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package chess.Pieces;
 
 import chess.game.GameInfoWrapper;
@@ -14,10 +9,10 @@ import java.util.List;
  * @author CarrollFD
  */
 public abstract class Piece {
-    // members accessable by child classes
+    // members accessible by child classes
     protected GameInfoWrapper gameInfo;
     
-    // members imutable by child classes
+    // members immutable by child classes
     private boolean color;
     private Position position;
     private boolean captured = false;
@@ -55,7 +50,7 @@ public abstract class Piece {
         
         // ensure the position is actually different
         // check there are no intervening peices
-        // check that any peices on the target position are capturable
+        // check that any pieces on the target position are capturable
         // check that the move is on the board
         return (deltaX != 0 || deltaY != 0) &&
                GameInfoWrapper.isOnBoard(position) &&

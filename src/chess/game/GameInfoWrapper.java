@@ -1,7 +1,3 @@
-/**
- * This class provides a wrapper for the game information so that it
- * can be provided to a piece while remaining immutable by that piece.
- **/
 package chess.game;
 
 import chess.Pieces.Piece;
