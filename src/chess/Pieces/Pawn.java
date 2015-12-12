@@ -8,15 +8,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents the chess piece: Pawn
  *
  * @author CarrollFD
  */
 public class Pawn extends Piece {
-
+    /**
+     * Constructs a new Pawn
+     *
+     * @param position The position of the piece
+     * @param color The color of the piece
+     * @param gameInfo The game info wrapper
+     */
     public Pawn(Position position, boolean color, GameInfoWrapper gameInfo) {
         super(position, PieceType.pawn, color, gameInfo);
     }
 
+    /**
+     * Deep Copy Constructor
+     *
+     * @param toCopy The Pawn to copy
+     * @param gameInfo The new game info wrapper
+     */
     public Pawn(Pawn toCopy, GameInfoWrapper gameInfo) {
         super(toCopy, gameInfo);
     }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents the game board.
  *
  * @author CarrollFD
  */
@@ -16,7 +17,7 @@ public class Board {
     public static final int BOARD_SIZE_X = 8;
     public static final int BOARD_SIZE_Y = 8;
 
-    // the peices on the board
+    // the pieces on the board
     private ArrayList<Piece> whitePieces;
     private ArrayList<Piece> blackPieces;
 
@@ -28,8 +29,6 @@ public class Board {
 
     // move error message
     private String moveError;
-
-
 
     /**
      * Constructs and initializes the board.
@@ -150,13 +149,13 @@ public class Board {
         } catch(IllegalStateException e) {
             // this exception is thrown when two kings are in check.  It will
             // prevent a player in check from checking their oponent while not
-            // aleivating their own check.
+            // alleviating their own check.
             moveError = "Move generates invalid board state - multiple kings "
                     + "in check.";
             return false;
         }
 
-        // interveining peice does not check the endpoint, since it doesn't have
+        // intervening piece does not check the endpoint, since it doesn't have
         // access to the color of the piece being moved to check for a capture
         // so we'll check that here.
         Piece pieceToCapture = getPieceAt(targetPosition);
@@ -166,7 +165,7 @@ public class Board {
             pieceToCapture.capture();
         }
 
-        // move the peice
+        // move the piece
         pieceToMove.move(targetPosition);
 
         // check for a threatened king
@@ -279,8 +278,6 @@ public class Board {
         int deltaY = Math.abs(position1.getY() - position2.getY());
         int deltaX = Math.abs(position1.getX() - position2.getX());
 
-        List<Position> interveningSpaces;
-
         if(deltaY != deltaX && !(deltaY == 0 ^ deltaX == 0)) {
             return false;
         }
@@ -306,7 +303,7 @@ public class Board {
 
         // loop through positions
         do {
-            // check if the position is contianed in the list of white pieces
+            // check if the position is contained in the list of white pieces
             for(Piece piece : whitePieces) {
                 if(!piece.isCaptured() && piece.getPosition().equals(checkPosition)) {
                     return true;
@@ -327,6 +324,13 @@ public class Board {
         return false;
     }
 
+    /**
+     * Provides the piece at the given position, or null if there is none.
+     *
+     * @param position The position to check
+     *
+     * @return The piece at the given position, or null if there is one.
+     */
     public Piece getPieceAt(Position position) {
         // check white pieces
         for(Piece piece : whitePieces) {
@@ -362,7 +366,7 @@ public class Board {
             piecesToCheck = blackPieces;
         }
 
-        // get the positions that each peice threatens
+        // get the positions that each piece threatens
         for(Piece piece : piecesToCheck) {
             threatenedPositions.addAll(piece.getThreatenedPositions());
         }
@@ -371,6 +375,11 @@ public class Board {
         return threatenedPositions;
     }
 
+    /**
+     * Updates the colorInCheck flag to indicate if a color is in check.
+     *
+     * @throws IllegalStateException If two kings are in check.
+     */
     private void verifyCheck() throws IllegalStateException {
         Piece whiteKing = null;
         Piece blackKing = null;
@@ -390,7 +399,7 @@ public class Board {
             }
         }
 
-        // make sure nothing incredibly wierd is going on
+        // make sure nothing incredibly weird is going on
         if(blackKing == null || whiteKing == null) {
             throw new IllegalStateException("One of the kings doesn't exist!");
         }
@@ -409,7 +418,7 @@ public class Board {
 
         // see if the white king is in check
         if(threatenedByBlack.contains(whiteKing.getPosition())) {
-            // the suposedly imposible case where both kings are in check.
+            // the supposedly impossible case where both kings are in check.
             if(colorInCheck != null) {
                 throw new IllegalStateException("Both kings in check.");
             }
@@ -435,20 +444,26 @@ public class Board {
                     + "a position with no piece.");
         }
 
-        // capture the peice at the end position
+        // capture the piece at the end position
         if(capturedPiece != null) {
             capturedPiece.capture();
         }
 
-        // move the pice
+        // move the piece
         piece.move(endPosition);
     }
 
+    /**
+     * @return Returns the move error message.
+     */
     public String getMoveError() {
         return moveError;
     }
 
-    public Boolean getColorInCheck() {
+    /**
+     * @return Provides the colorInCheck flag.
+     */
+    public Boolean isColorInCheck() {
         return colorInCheck;
     }
 }

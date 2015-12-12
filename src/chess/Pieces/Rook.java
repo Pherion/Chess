@@ -6,15 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents the chess piece Rook
  *
  * @author CarrollFD
  */
 public class Rook extends Piece {
-
+    /**
+     * Constructs a new Rook
+     *
+     * @param position The position of the piece
+     * @param color The color of the piece
+     * @param gameInfo The game info wrapper
+     */
     public Rook(Position position, boolean color, GameInfoWrapper gameInfo) {
         super(position, PieceType.rook, color, gameInfo);
     }
 
+    /**
+     * Deep Copy Constructor
+     *
+     * @param toCopy The Rook to copy
+     * @param gameInfo The new game info wrapper
+     */
     public Rook(Rook toCopy, GameInfoWrapper gameInfo) {
         super(toCopy, gameInfo);
     }
@@ -81,5 +94,4 @@ public class Rook extends Piece {
         // return the list of valid moves
         return validMoves;
     }
-    
 }

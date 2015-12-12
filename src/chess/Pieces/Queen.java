@@ -6,21 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Represents the chess piece: Queen
  * @author CarrollFD
  */
 public class Queen extends Piece {
 
     /**
+     * Constructs a new Queen
      *
-     * @param position
-     * @param color
-     * @param gameInfo
+     * @param position The position of the piece
+     * @param color The color of the piece
+     * @param gameInfo The game info wrapper
      */
     public Queen (Position position, boolean color, GameInfoWrapper gameInfo) {
         super(position, PieceType.queen, color, gameInfo);
     }
 
+    /**
+     * Deep Copy Constructor
+     *
+     * @param toCopy The Queen to copy
+     * @param gameInfo The new game info wrapper
+     */
     public Queen(Queen toCopy, GameInfoWrapper gameInfo) {
         super(toCopy, gameInfo);
     }

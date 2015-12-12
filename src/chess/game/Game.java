@@ -8,13 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents a game of chess.
  *
  * @author CarrollFD
  */
 public class Game {
+    // the game board
     private Board board;
+
+    // the list of moves executed during this game
     private List<Move> moveList = new ArrayList<>();
 
+    /**
+     * Constructs a new game.
+     */
     public Game() {
         GameInfoWrapper wrapper = new GameInfoWrapper(this);
         board = new Board(wrapper);
@@ -38,10 +45,16 @@ public class Game {
         }
     }
 
+    /**
+     * @return the game board
+     */
     public Board getBoard() {
         return board;
     }
 
+    /**
+     * @return the move list for this game
+     */
     public List<Move> getMoveList() {
         return moveList;
     }
@@ -50,8 +63,8 @@ public class Game {
      * Forces the given move.  This should only be used when testing to see
      * if the given move produces an invalid game state.
      *
-     * @param startPosition
-     * @param endPosition
+     * @param startPosition The starting position.
+     * @param endPosition The ending position.
      */
     protected void forceMove(Position startPosition, Position endPosition) {
         board.forceMove(startPosition, endPosition);

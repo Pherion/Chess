@@ -1,10 +1,12 @@
 package chess.game.board;
 
 /**
+ * Represents the position of a chess piece on the board.
  *
  * @author CarrollFD
  */
 public class Position {
+    // the stored position on the chess board
     private int x;
     private int y;
 

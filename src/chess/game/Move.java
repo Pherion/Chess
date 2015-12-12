@@ -4,6 +4,7 @@ import chess.Pieces.PieceType;
 import chess.game.board.Position;
 
 /**
+ * Represents a single move in the chess game.
  *
  * @author CarrollFD
  */
@@ -36,30 +37,51 @@ public class Move {
         endPositionTwo = new Position(toCopy.endPositionTwo);
     }
 
+    /**
+     * @return The color of the piece that moved
+     */
     public boolean isMoveColor() {
         return moveColor;
     }
 
+    /**
+     * @return The type of the piece that moved
+     */
     public PieceType getType() {
         return type;
     }
 
+    /**
+     * @return The starting position of the move
+     */
     public Position getStartPosition() {
         return startPosition;
     }
 
+    /**
+     * @return The ending position of the move
+     */
     public Position getEndPosition() {
         return endPosition;
     }
 
+    /**
+     * @return The type of any second piece involved in the move
+     */
     public PieceType getTypeTwo() {
         return typeTwo;
     }
 
+    /**
+     * @return The starting position of a second piece
+     */
     public Position getStartPositionTwo() {
         return startPositionTwo;
     }
 
+    /**
+     * @return The ending position of a second piece
+     */
     public Position getEndPositionTwo() {
         return endPositionTwo;
     }

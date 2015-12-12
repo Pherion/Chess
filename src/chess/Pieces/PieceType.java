@@ -1,6 +1,7 @@
 package chess.Pieces;
 
 /**
+ * Enum representing the types of pieces on a chess board.
  *
  * @author CarrollFD
  */

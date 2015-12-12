@@ -1,6 +1,7 @@
 package chess.game;
 
 /**
+ * Constants defining the starting positions of peices on a chess board.
  *
  * @author CarrollFD
  */

@@ -7,22 +7,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents the King.
+ * Represents the chess piece: King
  * 
  * @author CarrollFD
  */
 public class King extends Piece {    
 
     /**
+     * Constructs a new King
      *
-     * @param position
-     * @param color
-     * @param gameInfo
+     * @param position The position of the piece
+     * @param color The color of the piece
+     * @param gameInfo The game info wrapper
      */
     public King(Position position, boolean color, GameInfoWrapper gameInfo) {
         super(position, PieceType.king, color, gameInfo);
     }
 
+    /**
+     * Deep Copy Constructor
+     *
+     * @param toCopy The King to copy
+     * @param gameInfo The new game info wrapper
+     */
     public King(King toCopy, GameInfoWrapper gameInfo) {
         super(toCopy, gameInfo);
     }
@@ -119,6 +126,11 @@ public class King extends Piece {
         return super.validateMove(position);
     }
 
+    /**
+     * Validates a move to see if it is a castle.
+     *
+     * @return true if the move is a valid castle.
+     */
     private boolean validateCastle() {
         // verrify not in check
         if(gameInfo.threatenedBy(getPosition(), !getColor())) {

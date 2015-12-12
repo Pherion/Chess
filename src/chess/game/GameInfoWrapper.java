@@ -8,6 +8,8 @@ import chess.game.board.Position;
 import java.util.List;
 
 /**
+ * Wrapper for the Game object to be provided to Pieces so that they can access info about the game
+ * while the game remains immutable to them.
  *
  * @author CarrollFD
  */
@@ -116,13 +118,16 @@ public class GameInfoWrapper {
      * @param startPosition The position of the piece to move
      * @param endPosition The end position of the piece
      *
-     * @return
+     * @return A test Game object resulting from the forced move.
      */
     public Game forceMove(Position startPosition, Position endPosition) {
+        // create a new game that is a copy of the current game
         Game newGame = new Game(game);
 
+        // force the move on the new game
         newGame.forceMove(startPosition, endPosition);
 
+        // return the new game
         return newGame;
     }
 }

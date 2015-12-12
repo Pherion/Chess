@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * Represents a generic chess piece.
+ *
  * @author CarrollFD
  */
 public abstract class Piece {
@@ -18,7 +19,15 @@ public abstract class Piece {
     private boolean captured = false;
     private PieceType type;
     private boolean moved = false;
-    
+
+    /**
+     * Constructs a new chess piece.
+     *
+     * @param position The starting position of the piece
+     * @param type The type of the piece.
+     * @param color The color of the piece.
+     * @param gameInfo The game info wrapper
+     */
     protected Piece(Position position, PieceType type, boolean color, GameInfoWrapper gameInfo) {
         this.color = color;
         this.position = new Position(position);
@@ -26,6 +35,12 @@ public abstract class Piece {
         this.gameInfo = gameInfo;
     }
 
+    /**
+     * Deep copy of the piece
+     *
+     * @param toCopy The piece to copy
+     * @param gameInfo The new game info wrapper to use
+     */
     public Piece(Piece toCopy, GameInfoWrapper gameInfo) {
         this.gameInfo = gameInfo;
         color = toCopy.color;
@@ -60,7 +75,8 @@ public abstract class Piece {
     
     /**
      * Provides a list of valid moves for the given piece.
-     * @return
+     *
+     * @return The list of valid moves for the piece
      */
     public abstract List<Position> getValidMoves();
     

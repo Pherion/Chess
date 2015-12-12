@@ -6,15 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents the chess peice: Bishop
  *
  * @author CarrollFD
  */
 public class Bishop extends Piece {
-
+    /**
+     * Construct a new Bishop
+     *
+     * @param position The initial position of the Bishop
+     * @param color The color of the Bishop
+     * @param gameInfo The game info wrapper
+     */
     public Bishop(Position position, boolean color, GameInfoWrapper gameInfo) {
         super(position, PieceType.bishop, color, gameInfo);
     }
 
+    /**
+     * Deep Copy Constructor
+     *
+     * @param toCopy The Bishop to copy
+     * @param gameInfo The new game info wrapper to use
+     */
     public Bishop(Bishop toCopy, GameInfoWrapper gameInfo) {
         super(toCopy, gameInfo);
     }
@@ -80,5 +93,4 @@ public class Bishop extends Piece {
         // return the list of valid moves
         return validMoves;
     }
-    
 }
