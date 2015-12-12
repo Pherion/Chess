@@ -1,6 +1,6 @@
 package chess.game;
 
-import chess.Pieces.PieceType;
+import chess.pieces.PieceType;
 import chess.game.board.Position;
 
 /**

@@ -1,4 +1,4 @@
-package chess.Pieces;
+package chess.pieces;
 
 import chess.game.GameInfoWrapper;
 import chess.game.board.Position;

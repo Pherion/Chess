@@ -1,14 +1,14 @@
 package chess.game;
 
-import chess.Pieces.Piece;
-import chess.Pieces.PieceType;
+import chess.pieces.Piece;
+import chess.pieces.PieceType;
 import chess.game.board.Board;
 import chess.game.board.Position;
 
 import java.util.List;
 
 /**
- * Wrapper for the Game object to be provided to Pieces so that they can access info about the game
+ * Wrapper for the Game object to be provided to pieces so that they can access info about the game
  * while the game remains immutable to them.
  *
  * @author CarrollFD

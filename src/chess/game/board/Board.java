@@ -1,6 +1,6 @@
 package chess.game.board;
 
-import chess.Pieces.*;
+import chess.pieces.*;
 import chess.game.Game;
 import chess.game.GameInfoWrapper;
 import chess.game.StartingPositions;

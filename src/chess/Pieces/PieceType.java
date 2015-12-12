@@ -1,4 +1,4 @@
-package chess.Pieces;
+package chess.pieces;
 
 /**
  * Enum representing the types of pieces on a chess board.
