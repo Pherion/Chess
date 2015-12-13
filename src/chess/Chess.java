@@ -22,6 +22,10 @@
  **/
 package chess;
 
+import chess.game.Game;
+import chess.game.board.Position;
+import chess.renderers.StandardOutRenderer;
+
 /**
  *
  * @author CarrollFD
@@ -32,7 +36,14 @@ public class Chess {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        Game game = new Game();
+
+        StandardOutRenderer renderer = new StandardOutRenderer(game.getBoard());
+
+        System.out.println(game.getBoard().requestMove(new Position(1, 7), new Position(0, 5)));
+        System.out.println(game.getBoard().getMoveError());
+
+        renderer.render();
     }
     
 }
