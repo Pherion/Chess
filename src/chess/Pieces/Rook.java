@@ -51,7 +51,7 @@ public class Rook extends Piece {
     public List<Position> getValidMoves() {
         List<Position> validMoves = new ArrayList<>();
         Position checkPosition;
-        boolean validMove = true;
+        boolean validMove;
         
         // loop through the eight directions the queen can move
         for(int direction = 0; direction < 4; direction++) {

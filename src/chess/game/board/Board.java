@@ -4,7 +4,6 @@ import chess.pieces.*;
 import chess.game.Game;
 import chess.game.GameInfoWrapper;
 import chess.game.StartingPositions;
-import javafx.geometry.Pos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +136,7 @@ public class Board {
 
             // make sure an existing check is aleviated
             if(colorInCheck != null && colorInCheck.equals(testGame.getBoard().colorInCheck)) {
-                moveError = "Move does not aleviate check.";
+                moveError = "Move does not alleviate check.";
                 return false;
             }
 

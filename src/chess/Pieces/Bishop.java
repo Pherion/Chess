@@ -51,13 +51,15 @@ public class Bishop extends Piece {
     public List<Position> getValidMoves() {
         List<Position> validMoves = new ArrayList<>();
         Position checkPosition;
-        boolean validMove = true;
+        boolean validMove;
         
         // loop through the eight directions the queen can move
         for(int direction = 0; direction < 4; direction++) {
             // re-set check position
             checkPosition = new Position(getPosition());
-            
+
+            // reset valid move
+            validMove = true;
             // keep moving in each direction until an invalid move id
             // detected
             while(validMove) {                
