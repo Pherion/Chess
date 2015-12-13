@@ -40,7 +40,7 @@ public class Chess {
 
         StandardOutRenderer renderer = new StandardOutRenderer(game.getBoard());
 
-        System.out.println(game.getBoard().requestMove(new Position(1, 7), new Position(0, 5)));
+        System.out.println(game.getBoard().requestMove(new Position(4, 6), new Position(4, 5)));
         System.out.println(game.getBoard().getMoveError());
 
         renderer.render();

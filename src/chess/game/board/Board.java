@@ -4,6 +4,7 @@ import chess.pieces.*;
 import chess.game.Game;
 import chess.game.GameInfoWrapper;
 import chess.game.StartingPositions;
+import javafx.geometry.Pos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +19,8 @@ public class Board {
     public static final int BOARD_SIZE_Y = 8;
 
     // the pieces on the board
-    private ArrayList<Piece> whitePieces;
-    private ArrayList<Piece> blackPieces;
+    private List<Piece> whitePieces;
+    private List<Piece> blackPieces;
 
     // indicates the color in check, set to null if there is no
     private Boolean colorInCheck = null;
@@ -269,15 +270,18 @@ public class Board {
      * move is invalid for this check, but there are never any intervening
      * pieces for a knight.
      *
-     * @param position1
-     * @param position2
-     * @return
+     * @param position1 The starting position.
+     * @param position2 The ending Position
+     *
+     * @return true if there is an intervening piece
      */
     public boolean isInterveningPiece(Position position1, Position position2) {
         // calculate the distance moved in each direction
         int deltaY = Math.abs(position1.getY() - position2.getY());
         int deltaX = Math.abs(position1.getX() - position2.getX());
 
+        // Check that either the deltas are the same (a diagonal move)
+        // or one of them is 0 (a hoizontal move)
         if(deltaY != deltaX && !(deltaY == 0 ^ deltaX == 0)) {
             return false;
         }
@@ -286,20 +290,30 @@ public class Board {
         int xMovement;
         int yMovement;
 
-        if(position1.getX() - position2.getX() > 0) {
+        if(position1.getX() - position2.getX() < 0) {
             xMovement = 1;
-        } else {
+        } else if(position1.getX() - position2.getX() > 0) {
             xMovement = -1;
+        } else {
+            xMovement = 0;
         }
 
-        if(position1.getY() - position2.getY() > 0) {
+        if(position1.getY() - position2.getY() < 0) {
             yMovement = 1;
-        } else {
+        } else if(position1.getY() - position2.getY() > 0) {
             yMovement = -1;
+        } else {
+            yMovement = 0;
         }
 
         // calculate the first position to check
         Position checkPosition = new Position(position1.getX() + xMovement, position1.getY() + yMovement);
+
+        // make sure the first check position isn't the ending position
+        // we don't check endpoints, so the move is valid.
+        if(checkPosition.equals(position2)) {
+            return false;
+        }
 
         // loop through positions
         do {
@@ -359,7 +373,7 @@ public class Board {
         List<Piece> piecesToCheck;
         List<Position> threatenedPositions = new ArrayList<>();
 
-        // the the list of peices for the given color
+        // the the list of pieces for the given color
         if(color) {
             piecesToCheck = whitePieces;
         } else {
@@ -405,8 +419,8 @@ public class Board {
         }
 
         // get the squares threatened by each group
-        List<Position> threatenedByWhite = this.getThreatenedPositions(true);
-        List<Position> threatenedByBlack = this.getThreatenedPositions(false);
+        List<Position> threatenedByWhite = getThreatenedPositions(true);
+        List<Position> threatenedByBlack = getThreatenedPositions(false);
 
         // reset check flag
         colorInCheck = null;

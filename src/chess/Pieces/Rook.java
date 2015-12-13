@@ -57,6 +57,9 @@ public class Rook extends Piece {
         for(int direction = 0; direction < 4; direction++) {
             // re-set check position
             checkPosition = new Position(getPosition());
+
+            // reset valid move flag
+            validMove = true;
             
             // keep moving in each direction until an invalid move id
             // detected
