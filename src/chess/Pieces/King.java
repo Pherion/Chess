@@ -108,9 +108,9 @@ public class King extends Piece {
         int deltaY = Math.abs(getPosition().getY() - position.getY());
         
         // check to make sure the target position is not threatened
-        if(gameInfo.threatenedBy(position, !getColor())) {
-            return false;
-        }
+//        if(gameInfo.threatenedBy(position, !getColor())) {
+//            return false;
+//        }
         
         // check for a possible castle (the king moves exactly 2 spaces)
         if(deltaX == 2 && deltaY == 0) {
@@ -133,9 +133,9 @@ public class King extends Piece {
      */
     private boolean validateCastle() {
         // verrify not in check
-        if(gameInfo.threatenedBy(getPosition(), !getColor())) {
-            return false;
-        }
+//        if(gameInfo.threatenedBy(getPosition(), !getColor())) {
+//            return false;
+//        }
 
         // check in which direction the castle is being attempted
         // true = castle left

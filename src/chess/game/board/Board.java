@@ -142,7 +142,8 @@ public class Board {
 
             // if not in check, make sure this move doesnt put the player into
             // check
-            if(colorInCheck == null && pieceToMove.getColor() == testGame.getBoard().colorInCheck) {
+            if(testGame.getBoard().colorInCheck != null &&
+                    (colorInCheck == null && pieceToMove.getColor() == testGame.getBoard().colorInCheck)) {
                 moveError = "Move places moving player into check.";
                 return false;
             }

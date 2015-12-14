@@ -92,6 +92,11 @@ public class Pawn extends Piece {
         // get the previous move
         Move previousMove = gameInfo.getPreviousMove();
 
+        // if its the first move of the game, and en passant is illegal
+        if(previousMove == null) {
+            return false;
+        }
+
         // ensure that last move was performed by a pawn
         if(previousMove.getType() != PieceType.pawn) {
             return false;
