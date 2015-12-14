@@ -51,9 +51,7 @@ public abstract class Piece {
     }
 
     /**
-     * Verifies if the provided position is a valid move for the given piece.
-     * The assumption is made that the provided position is a position within
-     * the confines of the board.
+     * Verifies if the provided position is a legal move for the given piece.
      * 
      * @param position Position to check
      * @return TRUE if the position is a valid move
@@ -81,15 +79,12 @@ public abstract class Piece {
     public abstract List<Position> getValidMoves();
     
     /**
-     * Provides a list of positions threatened by this piece.
-     * At default this just returns the list of valid moves, but the Pawn
-     * will need to override it to compensate for it's capturing moves.
+     * Provides a list of positions that are threatened by the piece.  These positions
+     * may not be valid moves.
      * 
      * @return List of positions threatened by this piece.
      */
-    public List<Position> getThreatenedPositions() {
-        return getValidMoves();
-    }
+    public abstract List<Position> getThreatenedPositions();
     
     /**
      * Moves the piece to the given position.  No check is made to verify if

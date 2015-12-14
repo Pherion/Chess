@@ -48,9 +48,9 @@ public class Position {
     @Override
     public boolean equals(Object o) {
         if(o instanceof Position) {
-            Position toCompre = (Position)o;
+            Position toCompare = (Position)o;
 
-            return x == toCompre.x && y == toCompre.y;
+            return x == toCompare.x && y == toCompare.y;
         }
 
         return false;

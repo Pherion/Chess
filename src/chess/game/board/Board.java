@@ -1,9 +1,8 @@
 package chess.game.board;
 
-import chess.pieces.*;
-import chess.game.Game;
 import chess.game.GameInfoWrapper;
 import chess.game.StartingPositions;
+import chess.pieces.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,21 +13,21 @@ import java.util.List;
  * @author CarrollFD
  */
 public class Board {
+    // The size of a standard chess board
     public static final int BOARD_SIZE_X = 8;
     public static final int BOARD_SIZE_Y = 8;
 
-    // the pieces on the board
-    private List<Piece> whitePieces;
-    private List<Piece> blackPieces;
+    // The 2D array representing the board's squares
+    List<List<Square>> boardGrid = new ArrayList<>();
 
-    // indicates the color in check, set to null if there is no
-    private Boolean colorInCheck = null;
+    // Game info wrapper
+    GameInfoWrapper wrapper;
 
-    // game info wrapper
-    private GameInfoWrapper gameInfo;
+    // keeps track of who is in check
+    ColorInCheck colorInCheck = ColorInCheck.none;
 
-    // move error message
-    private String moveError;
+    // string indicating current move error
+    String moveError = "";
 
     /**
      * Constructs and initializes the board.
@@ -36,8 +35,14 @@ public class Board {
      * @param wrapper GameInfoWrapper with which to initialize the board.
      */
     public Board(GameInfoWrapper wrapper) {
-        gameInfo = wrapper;
-        initializeBoard(wrapper);
+        // set the wrapper
+        this.wrapper = wrapper;
+
+        // populate the board with starting positions
+        initializeBoard();
+
+        // figure out which squares are protected
+        determineProtectedSquares();
     }
 
     /**
@@ -48,59 +53,30 @@ public class Board {
      *                still point at the original game parent.
      */
     public Board(Board toCopy, GameInfoWrapper wrapper) {
-        // assing wrapper and check flag.
-        gameInfo = wrapper;
-        colorInCheck = toCopy.colorInCheck;
+        // copy primitive members
+        this.colorInCheck = toCopy.colorInCheck;
+        this.moveError = toCopy.moveError;
 
-        // copy white pieces
-        whitePieces = new ArrayList<>();
-        for(Piece piece : toCopy.whitePieces) {
-            switch(piece.getType()) {
-                case bishop:
-                    whitePieces.add(new Bishop((Bishop)piece, wrapper));
-                    break;
-                case king:
-                    whitePieces.add(new King((King)piece, wrapper));
-                    break;
-                case knight:
-                    whitePieces.add(new Knight((Knight)piece, wrapper));
-                    break;
-                case pawn:
-                    whitePieces.add(new Pawn((Pawn)piece, wrapper));
-                    break;
-                case queen:
-                    whitePieces.add(new Queen((Queen)piece, wrapper));
-                    break;
-                case rook:
-                    whitePieces.add(new Rook((Rook)piece, wrapper));
-                    break;
+        // populate an empty board
+        populateSquares();
+
+        // extract board grid to copy
+        List<List<Square>> gridToCopy = toCopy.boardGrid;
+
+        // loop through rows
+        for(int y = 0; y < Board.BOARD_SIZE_Y; y++) {
+            //loop through columns
+            for(int x = 0; x < Board.BOARD_SIZE_X; x++) {
+                // create a deep copy of the square
+                Square newSquare = new Square(gridToCopy.get(y).get(x), wrapper);
+
+                // assign the new square to the appropriate x, y
+                boardGrid.get(y).set(x, newSquare);
             }
         }
 
-        // copy black pieces
-        blackPieces = new ArrayList<>();
-        for(Piece piece : toCopy.blackPieces) {
-            switch(piece.getType()) {
-                case bishop:
-                    blackPieces.add(new Bishop((Bishop)piece, wrapper));
-                    break;
-                case king:
-                    blackPieces.add(new King((King)piece, wrapper));
-                    break;
-                case knight:
-                    blackPieces.add(new Knight((Knight)piece, wrapper));
-                    break;
-                case pawn:
-                    blackPieces.add(new Pawn((Pawn)piece, wrapper));
-                    break;
-                case queen:
-                    blackPieces.add(new Queen((Queen)piece, wrapper));
-                    break;
-                case rook:
-                    blackPieces.add(new Rook((Rook)piece, wrapper));
-                    break;
-            }
-        }
+        // figure out which squares are protected
+        determineProtectedSquares();
     }
 
     /**
@@ -112,139 +88,177 @@ public class Board {
      * @return TRUE if the move was performed, FALSE if there were any problems
      */
     public boolean requestMove(Position piecePosition, Position targetPosition) {
-        Piece pieceToMove = getPieceAt(piecePosition);
-        moveError = "";
-
-        // make sure there is a piece at the requested location
-        if(pieceToMove == null) {
-            moveError = "No piece to move.";
-            return false;
-        }
-
-        // validate the move
-        if(!pieceToMove.validateMove(targetPosition)) {
-            moveError = "Invalid move for a " + pieceToMove.getType();
-            return false;
-        }
-
-        // generate a test game board with the move executed.
-        Game testGame = gameInfo.forceMove(piecePosition, targetPosition);
-
-        // verify check states
-        try {
-            testGame.getBoard().verifyCheck();
-
-            // make sure an existing check is aleviated
-            if(colorInCheck != null && colorInCheck.equals(testGame.getBoard().colorInCheck)) {
-                moveError = "Move does not alleviate check.";
-                return false;
-            }
-
-            // if not in check, make sure this move doesnt put the player into
-            // check
-            if(testGame.getBoard().colorInCheck != null &&
-                    (colorInCheck == null && pieceToMove.getColor() == testGame.getBoard().colorInCheck)) {
-                moveError = "Move places moving player into check.";
-                return false;
-            }
-        } catch(IllegalStateException e) {
-            // this exception is thrown when two kings are in check.  It will
-            // prevent a player in check from checking their oponent while not
-            // alleviating their own check.
-            moveError = "Move generates invalid board state - multiple kings "
-                    + "in check.";
-            return false;
-        }
-
-        // intervening piece does not check the endpoint, since it doesn't have
-        // access to the color of the piece being moved to check for a capture
-        // so we'll check that here.
-        Piece pieceToCapture = getPieceAt(targetPosition);
-
-        if(pieceToCapture != null && pieceToCapture.getColor() != pieceToMove.getColor()) {
-            // execute the capture
-            pieceToCapture.capture();
-        }
-
-        // move the piece
-        pieceToMove.move(targetPosition);
-
-        // check for a threatened king
-        verifyCheck();
-
-        // let the caller know the move was executed
-        return true;
     }
 
     /**
      * Sets-up the board with starting positions.  Re-sets the board if pieces
      * are already placed.
-     *
-     * @param wrapper the GameInfoWrapper to initialize the board with
      */
-    public final void initializeBoard(GameInfoWrapper wrapper) {
-        whitePieces = new ArrayList<>();
-        blackPieces = new ArrayList<>();
+    public final void initializeBoard() {
+        // clear the board
+        populateSquares();
 
-        Position piecePosition;
-        // create white rooks
-        piecePosition = new Position(StartingPositions.ROOK_1, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new Rook(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.ROOK_2, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new Rook(piecePosition, true, wrapper));
+        Position positionToSet;
 
-        // create white bishops
-        piecePosition = new Position(StartingPositions.BISHOP_1, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new Bishop(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.BISHOP_2, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new Bishop(piecePosition, true, wrapper));
+        // Initialize black non-pawn pieces
+        positionToSet = new Position(StartingPositions.ROOK_1, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Rook(positionToSet, false, wrapper));
+        positionToSet = new Position(StartingPositions.ROOK_2, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Rook(positionToSet, false, wrapper));
 
-        // create white knights
-        piecePosition = new Position(StartingPositions.KNIGHT_1, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new Knight(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.KNIGHT_2, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new Knight(piecePosition, true, wrapper));
+        positionToSet = new Position(StartingPositions.BISHOP_1, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Bishop(positionToSet, false, wrapper));
+        positionToSet = new Position(StartingPositions.BISHOP_2, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Bishop(positionToSet, false, wrapper));
 
-        // create white royalty
-        piecePosition = new Position(StartingPositions.WHITE_KING_X, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new King(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.WHITE_QUEEN_X, StartingPositions.WHITE_NON_PAWN_Y);
-        whitePieces.add(new Queen(piecePosition, true, wrapper));
+        positionToSet = new Position(StartingPositions.KNIGHT_1, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Knight(positionToSet, false, wrapper));
+        positionToSet = new Position(StartingPositions.KNIGHT_2, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Knight(positionToSet, false, wrapper));
 
-        // create white pawns
-        for(int i = 0; i < 8; i++) {
-            piecePosition = new Position(i, StartingPositions.WHITE_PAWN_Y);
-            whitePieces.add(new Pawn(piecePosition, true, wrapper));
+        positionToSet = new Position(StartingPositions.BLACK_KING_X, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new King(positionToSet, false, wrapper));
+        positionToSet = new Position(StartingPositions.BLACK_QUEEN_X, StartingPositions.BLACK_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Queen(positionToSet, false, wrapper));
+
+        // initialize black pawns
+        positionToSet = new Position(0, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+        positionToSet = new Position(1, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+        positionToSet = new Position(2, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+        positionToSet = new Position(3, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+        positionToSet = new Position(4, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+        positionToSet = new Position(5, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+        positionToSet = new Position(6, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+        positionToSet = new Position(7, StartingPositions.BLACK_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, false, wrapper));
+
+        // Initialize white non-pawn pieces
+        positionToSet = new Position(StartingPositions.ROOK_1, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Rook(positionToSet, true, wrapper));
+        positionToSet = new Position(StartingPositions.ROOK_2, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Rook(positionToSet, true, wrapper));
+
+        positionToSet = new Position(StartingPositions.BISHOP_1, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Bishop(positionToSet, true, wrapper));
+        positionToSet = new Position(StartingPositions.BISHOP_2, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Bishop(positionToSet, true, wrapper));
+
+        positionToSet = new Position(StartingPositions.KNIGHT_1, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Knight(positionToSet, true, wrapper));
+        positionToSet = new Position(StartingPositions.KNIGHT_2, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Knight(positionToSet, true, wrapper));
+
+        positionToSet = new Position(StartingPositions.WHITE_KING_X, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new King(positionToSet, true, wrapper));
+        positionToSet = new Position(StartingPositions.WHITE_QUEEN_X, StartingPositions.WHITE_NON_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Queen(positionToSet, true, wrapper));
+
+        // initialize white pawns
+        positionToSet = new Position(0, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+        positionToSet = new Position(1, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+        positionToSet = new Position(2, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+        positionToSet = new Position(3, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+        positionToSet = new Position(4, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+        positionToSet = new Position(5, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+        positionToSet = new Position(6, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+        positionToSet = new Position(7, StartingPositions.WHITE_PAWN_Y);
+        boardGrid.get(positionToSet.getY()).get(positionToSet.getX()).setPieceOnSquare(new Pawn(positionToSet, true, wrapper));
+    }
+
+    /**
+     * Populates the board with empty squares
+     */
+    private void populateSquares() {
+        // loop through rows
+        for(int y = 0; y < Board.BOARD_SIZE_Y; y++) {
+            // create a new row
+            boardGrid.set(y, new ArrayList<>());
+
+            // loop through columns
+            for(int x = 0; x < Board.BOARD_SIZE_X; x++) {
+                // create a new square at the current x and y
+                boardGrid.get(y).set(x, new Square());
+            }
+        }
+    }
+
+    /**
+     * Populates the threatened squares lists.
+     */
+    private void determineProtectedSquares() {
+        // clear the protected lists
+        List<Position> protectedByBlack = new ArrayList<>();
+        List<Position> protectedByWhite = new ArrayList<>();
+
+        // loop through the board's rows and columns
+        for(int y = 0; y < Board.BOARD_SIZE_Y; y++) {
+            for(int x = 0; x < Board.BOARD_SIZE_X; x++) {
+                // extract the piece on this x, y
+                Piece piece = boardGrid.get(y).get(x).getPieceOnSquare();
+
+                // make sure there is a piece here, if not continue the loop
+                if(piece == null) {
+                    continue;
+                }
+
+                // extract the positions protected by this piece
+                List<Position> protectedPositions = piece.getThreatenedPositions();
+
+                if(piece.getColor()) {
+                    // if its white, update the white protected list
+                    for(Position position : protectedPositions) {
+                        if(!protectedByWhite.contains(position)) {
+                            protectedByWhite.add(position);
+                        }
+                    }
+                } else {
+                    // if its black, update the black protected list
+                    for(Position position : protectedPositions) {
+                        if(!protectedByBlack.contains(position)) {
+                            protectedByBlack.add(position);
+                        }
+                    }
+                }
+            }
         }
 
-        // create black rooks
-        piecePosition = new Position(StartingPositions.ROOK_1, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new Rook(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.ROOK_2, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new Rook(piecePosition, true, wrapper));
+        // loop through the rows and columns of the board and update each as necessary
+        for(int y = 0; y < Board.BOARD_SIZE_Y; y++) {
+            for(int x = 0; x < Board.BOARD_SIZE_X; x++) {
+                Position position = new Position(x, y);
 
-        // create black bishops
-        piecePosition = new Position(StartingPositions.BISHOP_1, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new Bishop(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.BISHOP_2, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new Bishop(piecePosition, true, wrapper));
+                // check if either white or black protects the square
+                if(protectedByBlack.contains(position) || protectedByWhite.contains(position)) {
+                    // if black protects the square, update its flag
+                    if(protectedByBlack.contains(position)) {
+                        boardGrid.get(y).get(x).setProtectedByBlack(true);
+                    }
 
-        // create black knights
-        piecePosition = new Position(StartingPositions.KNIGHT_1, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new Knight(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.KNIGHT_2, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new Knight(piecePosition, true, wrapper));
+                    // if white protects the square, update its flag
+                    if(protectedByWhite.contains(position)) {
+                        boardGrid.get(y).get(x).setProtectedByWhite(true);
+                    }
+                } else {
+                    // if neither protect the square, update it correctly
+                    boardGrid.get(y).get(x).setProtectedByBlack(false);
+                    boardGrid.get(y).get(x).setProtectedByWhite(false);
+                }
 
-        // create black royalty
-        piecePosition = new Position(StartingPositions.BLACK_KING_X, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new King(piecePosition, true, wrapper));
-        piecePosition = new Position(StartingPositions.BLACK_QUEEN_X, StartingPositions.BLACK_NON_PAWN_Y);
-        blackPieces.add(new Queen(piecePosition, true, wrapper));
-
-        // create black pawns
-        for(int i = 0; i < 8; i++) {
-            piecePosition = new Position(i, StartingPositions.BLACK_PAWN_Y);
-            blackPieces.add(new Pawn(piecePosition, true, wrapper));
+            }
         }
     }
 
@@ -257,9 +271,9 @@ public class Board {
      * @return TRUE if the given color threatens the given position
      */
     public boolean threatenedBy(Position position, boolean color) {
-        List<Position> threatenedPositions = getThreatenedPositions(color);
+        Square square = boardGrid.get(position.getY()).get(position.getX());
 
-        return threatenedPositions.contains(position);
+        return (square.isProtectedByBlack() && color) || (square.isProtectedByWhite() && color)
     }
 
     /**
@@ -276,66 +290,6 @@ public class Board {
      * @return true if there is an intervening piece
      */
     public boolean isInterveningPiece(Position position1, Position position2) {
-        // calculate the distance moved in each direction
-        int deltaY = Math.abs(position1.getY() - position2.getY());
-        int deltaX = Math.abs(position1.getX() - position2.getX());
-
-        // Check that either the deltas are the same (a diagonal move)
-        // or one of them is 0 (a hoizontal move)
-        if(deltaY != deltaX && !(deltaY == 0 ^ deltaX == 0)) {
-            return false;
-        }
-
-        // determine the direction we're moving
-        int xMovement;
-        int yMovement;
-
-        if(position1.getX() - position2.getX() < 0) {
-            xMovement = 1;
-        } else if(position1.getX() - position2.getX() > 0) {
-            xMovement = -1;
-        } else {
-            xMovement = 0;
-        }
-
-        if(position1.getY() - position2.getY() < 0) {
-            yMovement = 1;
-        } else if(position1.getY() - position2.getY() > 0) {
-            yMovement = -1;
-        } else {
-            yMovement = 0;
-        }
-
-        // calculate the first position to check
-        Position checkPosition = new Position(position1.getX() + xMovement, position1.getY() + yMovement);
-
-        // make sure the first check position isn't the ending position
-        // we don't check endpoints, so the move is valid.
-        if(checkPosition.equals(position2)) {
-            return false;
-        }
-
-        // loop through positions
-        do {
-            // check if the position is contained in the list of white pieces
-            for(Piece piece : whitePieces) {
-                if(!piece.isCaptured() && piece.getPosition().equals(checkPosition)) {
-                    return true;
-                }
-            }
-
-            // and for black
-            for(Piece piece : blackPieces) {
-                if(!piece.isCaptured() && piece.getPosition().equals(checkPosition)) {
-                    return true;
-                }
-            }
-
-            // move to the next check positions
-            checkPosition = new Position(checkPosition.getX() + xMovement, checkPosition.getY() + yMovement);
-        } while(!checkPosition.equals(position2));
-
-        return false;
     }
 
     /**
@@ -346,20 +300,7 @@ public class Board {
      * @return The piece at the given position, or null if there is one.
      */
     public Piece getPieceAt(Position position) {
-        // check white pieces
-        for(Piece piece : whitePieces) {
-            if(!piece.isCaptured() && piece.getPosition().equals(position)) {
-                return piece;
-            }
-        }
-
-        // check black pieces
-        for(Piece piece : blackPieces) {
-            if(!piece.isCaptured() && piece.getPosition().equals(position)) {
-                return piece;
-            }
-        }
-        return null;
+        return boardGrid.get(position.getY()).get(position.getX()).getPieceOnSquare();
     }
 
     /**
@@ -370,23 +311,27 @@ public class Board {
      * @return List of positions threatened by the given color.
      */
     public List<Position> getThreatenedPositions(boolean color) {
-        List<Piece> piecesToCheck;
-        List<Position> threatenedPositions = new ArrayList<>();
+        List<Position> threatened = new ArrayList<>();
 
-        // the the list of pieces for the given color
-        if(color) {
-            piecesToCheck = whitePieces;
-        } else {
-            piecesToCheck = blackPieces;
-        }
-
-        // get the positions that each piece threatens
-        for(Piece piece : piecesToCheck) {
-            threatenedPositions.addAll(piece.getThreatenedPositions());
+        // loop through the board squares
+        for(int y = 0; y < Board.BOARD_SIZE_Y; y++) {
+            for(int x  = 0; x < Board.BOARD_SIZE_X; x++) {
+                if(color) {
+                    // check if white threatens the square
+                    if(boardGrid.get(y).get(x).isProtectedByWhite()) {
+                        threatened.add(new Position(x, y));
+                    }
+                } else {
+                    // check if black threatens the square
+                    if(boardGrid.get(y).get(x).isProtectedByBlack()) {
+                        threatened.add(new Position(x, y));
+                    }
+                }
+            }
         }
 
         // return the list
-        return threatenedPositions;
+        return threatened;
     }
 
     /**
@@ -395,50 +340,6 @@ public class Board {
      * @throws IllegalStateException If two kings are in check.
      */
     private void verifyCheck() throws IllegalStateException {
-        Piece whiteKing = null;
-        Piece blackKing = null;
-
-        // find the kings
-        for(Piece piece : whitePieces) {
-            if(piece instanceof King) {
-                whiteKing = piece;
-                break;
-            }
-        }
-
-        for(Piece piece : blackPieces) {
-            if(piece instanceof King) {
-                blackKing = piece;
-                break;
-            }
-        }
-
-        // make sure nothing incredibly weird is going on
-        if(blackKing == null || whiteKing == null) {
-            throw new IllegalStateException("One of the kings doesn't exist!");
-        }
-
-        // get the squares threatened by each group
-        List<Position> threatenedByWhite = getThreatenedPositions(true);
-        List<Position> threatenedByBlack = getThreatenedPositions(false);
-
-        // reset check flag
-        colorInCheck = null;
-
-        // see if the black king is in check.
-        if(threatenedByWhite.contains(blackKing.getPosition())) {
-            colorInCheck = false;
-        }
-
-        // see if the white king is in check
-        if(threatenedByBlack.contains(whiteKing.getPosition())) {
-            // the supposedly impossible case where both kings are in check.
-            if(colorInCheck != null) {
-                throw new IllegalStateException("Both kings in check.");
-            }
-
-            colorInCheck = true;
-        }
     }
 
     /**
@@ -448,23 +349,6 @@ public class Board {
      * @param endPosition The ending position
      */
     public void forceMove(Position startPosition, Position endPosition) {
-        // get the pieces at the start ane end positions
-        Piece piece = getPieceAt(startPosition);
-        Piece capturedPiece = getPieceAt(endPosition);
-
-        // make sure there's a piece to move
-        if(piece == null) {
-            throw new IllegalArgumentException("Attempting to force move on "
-                    + "a position with no piece.");
-        }
-
-        // capture the piece at the end position
-        if(capturedPiece != null) {
-            capturedPiece.capture();
-        }
-
-        // move the piece
-        piece.move(endPosition);
     }
 
     /**
@@ -477,7 +361,7 @@ public class Board {
     /**
      * @return Provides the colorInCheck flag.
      */
-    public Boolean isColorInCheck() {
+    public ColorInCheck getColorInCheck() {
         return colorInCheck;
     }
 }
