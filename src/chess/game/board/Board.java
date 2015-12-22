@@ -273,7 +273,7 @@ public class Board {
     public boolean threatenedBy(Position position, boolean color) {
         Square square = boardGrid.get(position.getY()).get(position.getX());
 
-        return (square.isProtectedByBlack() && color) || (square.isProtectedByWhite() && color)
+        return (square.isProtectedByBlack() && color) || (square.isProtectedByWhite() && color);
     }
 
     /**
@@ -290,7 +290,71 @@ public class Board {
      * @return true if there is an intervening piece
      */
     public boolean isInterveningPiece(Position position1, Position position2) {
+        // calculate the deltas
+        int deltaX = Math.abs(position1.getX() - position2.getX());
+        int deltaY = Math.abs(position1.getY() - position2.getY());
+
+        // default our changes in x and y to 0
+        int changeInX = 0;
+        int changeInY = 0;
+
+        // determine if our changes in x and y are different
+        if(deltaX == deltaY) {
+            // the move is vertical
+
+            // calculate the change in x
+            if(position1.getX() - position2.getX() > 0) {
+                changeInX = -1;
+            } else if(position1.getX() - position2.getX() < 0) {
+                changeInX = 1;
+            }
+
+            // calculate the change in Y
+            if(position1.getY() - position2.getY() > 0) {
+                changeInY = -1;
+            } else if(position1.getY() - position2.getY() < 0) {
+                changeInY = 1;
+            }
+        } else if(deltaX == 0 ^ deltaY == 0) {
+            // the move is horizontal
+
+            // change in X
+            if(deltaX > 0) {
+                changeInX = -1;
+            } else if(deltaX < 0) {
+                changeInY = 1;
+            }
+
+            // change Y
+            if(deltaY > 0) {
+                changeInY = -1;
+            } else if (deltaY < 0) {
+                changeInY = 1;
+            }
+        } else {
+            // the move is not vertical or horizontal, it may be a knights move, but either way we don't
+            // need to verify intervening moves
+            return false;
+        }
+
+        int x = position1.getX() + changeInX;
+        int y = position1.getY() + changeInY;
+
+        while(position2.getX() != x && position2.getY() != y) {
+            // check if there is a piece at the current spot
+            if(boardGrid.get(y).get(x).getPieceOnSquare() != null) {
+                return true;
+            }
+
+            // increment the position
+            x += changeInX;
+            y += changeInY;
+        }
+
+        // no intervening pieces were found
+        return false;
     }
+
 
     /**
      * Provides the piece at the given position, or null if there is none.
