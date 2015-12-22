@@ -4,6 +4,7 @@ import chess.pieces.Piece;
 import chess.pieces.PieceType;
 import chess.game.board.Board;
 import chess.game.board.Position;
+import chess.pieces.ImmutablePiece;
 
 import java.util.List;
 
@@ -129,5 +130,21 @@ public class GameInfoWrapper {
 
         // return the new game
         return newGame;
+    }
+    
+    /**
+     * Provides a copy of the piece at the given position
+     * 
+     * @param position
+     * @return 
+     */
+    public ImmutablePiece getPieceAt(Position position) {
+        Piece pieceAtPosition = game.getBoard().getPieceAt(position);
+        
+        if(pieceAtPosition == null) {
+            return null;
+        }
+        
+        return new ImmutablePiece(pieceAtPosition);
     }
 }

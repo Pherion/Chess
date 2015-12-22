@@ -15,4 +15,9 @@ public interface BoardRenderer {
      * @param style The style to use when rendering
      */
     void setRendererStyle(RendererStyle style);
+    
+    /**
+     * @param action the move request action
+     */
+    void setMoveRequestAction(MoveRequestAction action);
 }

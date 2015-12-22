@@ -23,8 +23,15 @@
 package chess;
 
 import chess.game.Game;
+import chess.game.GameInfoWrapper;
 import chess.game.board.Position;
+import chess.renderers.MoveRequestAction;
+import chess.renderers.swingRenderer.GameBoardPanel;
 import chess.renderers.StandardOutRenderer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  *
@@ -38,12 +45,22 @@ public class Chess {
     public static void main(String[] args) {
         Game game = new Game();
 
-        StandardOutRenderer renderer = new StandardOutRenderer(game.getBoard());
-
-        System.out.println(game.getBoard().requestMove(new Position(4, 6), new Position(4, 5)));
-        System.out.println(game.getBoard().getMoveError());
-
-        renderer.render();
+        JFrame frame = new JFrame("Test Game");
+        GameBoardPanel gamePanel = new GameBoardPanel(new GameInfoWrapper(game));
+        
+        gamePanel.setMoveRequestAction(new MoveRequestAction() {
+            @Override
+            public void moveRequest(Position startPosition, Position endPosition) {
+                game.getBoard().requestMove(startPosition, endPosition);
+            }
+        });
+        
+        gamePanel.render();
+        frame.add(gamePanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
     
 }

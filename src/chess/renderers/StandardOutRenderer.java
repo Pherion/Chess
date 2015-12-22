@@ -120,4 +120,9 @@ public class StandardOutRenderer implements BoardRenderer {
     public void setRendererStyle(RendererStyle style) {
         this.style = style;
     }
+
+    @Override
+    public void setMoveRequestAction(MoveRequestAction action) {
+        // no move request action is provided for this implementation
+    }
 }

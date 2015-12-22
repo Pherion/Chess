@@ -44,25 +44,27 @@ public class Square {
         this.protectedByWhite = toCopy.protectedByWhite;
         this.protectedByBlack = toCopy.protectedByBlack;
 
-        switch(toCopy.getPieceOnSquare().getType()) {
-            case pawn:
-                pieceOnSquare = new Pawn((Pawn)toCopy.getPieceOnSquare(), wrapper);
-                break;
-            case rook:
-                pieceOnSquare = new Rook((Rook)toCopy.getPieceOnSquare(), wrapper);
-                break;
-            case knight:
-                pieceOnSquare = new Knight((Knight)toCopy.getPieceOnSquare(), wrapper);
-                break;
-            case bishop:
-                pieceOnSquare = new Bishop((Bishop)toCopy.getPieceOnSquare(), wrapper);
-                break;
-            case king:
-                pieceOnSquare = new King((King)toCopy.getPieceOnSquare(), wrapper);
-                break;
-            case queen:
-                pieceOnSquare = new Queen((Queen)toCopy.getPieceOnSquare(), wrapper);
-                break;
+        if(toCopy.getPieceOnSquare() != null) {
+            switch(toCopy.getPieceOnSquare().getType()) {
+                case pawn:
+                    pieceOnSquare = new Pawn((Pawn)toCopy.getPieceOnSquare(), wrapper);
+                    break;
+                case rook:
+                    pieceOnSquare = new Rook((Rook)toCopy.getPieceOnSquare(), wrapper);
+                    break;
+                case knight:
+                    pieceOnSquare = new Knight((Knight)toCopy.getPieceOnSquare(), wrapper);
+                    break;
+                case bishop:
+                    pieceOnSquare = new Bishop((Bishop)toCopy.getPieceOnSquare(), wrapper);
+                    break;
+                case king:
+                    pieceOnSquare = new King((King)toCopy.getPieceOnSquare(), wrapper);
+                    break;
+                case queen:
+                    pieceOnSquare = new Queen((Queen)toCopy.getPieceOnSquare(), wrapper);
+                    break;
+            }
         }
     }
 
