@@ -21,7 +21,9 @@ import javax.swing.SwingConstants;
  * @author CarrollFD
  */
 public class GameBoardPanel extends JPanel implements BoardRenderer {
-    
+    private RendererStyle style;
+
+    @Override
     public void render() {
         GridLayout layout = new GridLayout(8, 8);
         setLayout(layout);
@@ -62,7 +64,6 @@ public class GameBoardPanel extends JPanel implements BoardRenderer {
 
     @Override
     public void setRendererStyle(RendererStyle style) {
-
     }
 
     private void addPiece(String piece) {
@@ -71,15 +72,5 @@ public class GameBoardPanel extends JPanel implements BoardRenderer {
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         label.setFont(font);
         add(label);
-    }
-    
-    public JPanel getPanel() throws IllegalStateException {
-        if(panel == null) {
-            throw new IllegalStateException("You must invoke "
-                    + "GameBoardPanel.render() before attempting to access "
-                    + "GameBoardPanel.getPanel()");
-        }
-        
-        return panel;
     }
 }
