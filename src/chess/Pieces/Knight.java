@@ -34,6 +34,11 @@ public class  Knight extends Piece {
     
     @Override
     public boolean validateMove(Position position) {
+        // make sure the move is on the board
+        if(!GameInfoWrapper.isOnBoard(position)) {
+            return false;
+        }
+        
         // calculate the changes
         int deltaX = Math.abs(getPosition().getX() - position.getX());
         int deltaY = Math.abs(getPosition().getY() - position.getY());
@@ -46,10 +51,10 @@ public class  Knight extends Piece {
         // perform global validation
         return super.validateMove(position);
     }
-    
+
     @Override
-    public List<Position> getValidMoves() {
-        List<Position> validMoves = new ArrayList<>();
+    public List<Position> getThreatenedPositions() {
+        List<Position> threatenedPositions = new ArrayList<>();
         List<Position> possibleMoves = new ArrayList<>();
         
         // populate the possible moves with all knight moves
@@ -64,13 +69,13 @@ public class  Knight extends Piece {
         
         // check each move
         for(Position position : possibleMoves) {
-            if(validateMove(position)) {
-                validMoves.add(position);
+            if(validateThreatened(position)) {
+                threatenedPositions.add(position);
             }
         }
         
         // return the valid moves
-        return validMoves;
+        return threatenedPositions;
     }
     
 }

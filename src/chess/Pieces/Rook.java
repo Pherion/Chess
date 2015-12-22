@@ -34,6 +34,11 @@ public class Rook extends Piece {
 
     @Override
     public boolean validateMove(Position position) {
+        // make sure the move is on the board
+        if(!GameInfoWrapper.isOnBoard(position)) {
+            return false;
+        }
+        
         // calculate the changes
         int deltaX = Math.abs(getPosition().getX() - position.getX());
         int deltaY = Math.abs(getPosition().getY() - position.getY());
@@ -46,10 +51,10 @@ public class Rook extends Piece {
         // perform global validation.
         return super.validateMove(position);
     }
-    
+
     @Override
-    public List<Position> getValidMoves() {
-        List<Position> validMoves = new ArrayList<>();
+    public List<Position> getThreatenedPositions() {
+        List<Position> threatenedPositions = new ArrayList<>();
         Position checkPosition;
         boolean validMove;
         
@@ -85,16 +90,16 @@ public class Rook extends Piece {
                 }
                 
                 // validate the move
-                validMove = validateMove(checkPosition);
+                validMove = validateThreatened(checkPosition);
                 
                 // if it's good, add it to the list
                 if(validMove) {
-                    validMoves.add(checkPosition);
+                    threatenedPositions.add(checkPosition);
                 }
             }
         }
         
         // return the list of valid moves
-        return validMoves;
+        return threatenedPositions;
     }
 }

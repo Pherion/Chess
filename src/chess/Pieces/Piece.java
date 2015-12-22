@@ -2,6 +2,7 @@ package chess.pieces;
 
 import chess.game.GameInfoWrapper;
 import chess.game.board.Position;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,6 +11,9 @@ import java.util.List;
  * @author CarrollFD
  */
 public abstract class Piece {
+    public static final boolean WHITE = true;
+    public static final boolean BLACK = false;
+    
     // members accessible by child classes
     protected GameInfoWrapper gameInfo;
     
@@ -57,18 +61,30 @@ public abstract class Piece {
      * @return TRUE if the position is a valid move
      */
     public boolean validateMove(Position position) {
+        // ensure the position is actually different
+        // check there are no intervening peices
+        // check that any pieces on the target position are capturable
+        // check that the move is on the board
+        return validateThreatened(position) && 
+                gameInfo.isCapturable(color, position);
+    }
+    
+    /**
+     * Verifies if the provided position is threatened by the piece.
+     * @param position
+     * @return 
+     */
+    public boolean validateThreatened(Position position) {
         // calculate the changes
         int deltaX = Math.abs(getPosition().getX() - position.getX());
         int deltaY = Math.abs(getPosition().getY() - position.getY());
         
         // ensure the position is actually different
         // check there are no intervening peices
-        // check that any pieces on the target position are capturable
         // check that the move is on the board
         return (deltaX != 0 || deltaY != 0) &&
                GameInfoWrapper.isOnBoard(position) &&
-               !gameInfo.isInterveningPeice(this.position, position) && 
-               gameInfo.isCapturable(color, position);
+               !gameInfo.isInterveningPeice(this.position, position);
     }
     
     /**
@@ -76,7 +92,27 @@ public abstract class Piece {
      *
      * @return The list of valid moves for the piece
      */
-    public abstract List<Position> getValidMoves();
+    public List<Position> getValidMoves() {
+        // obtain the list of positions threatened by this piece
+        List<Position> threatenedPositions = getThreatenedPositions();
+        List<Position> validMoves = new ArrayList<>();
+        
+        // loop through the threatened positions, and verify they are valid
+        // moves by invoking isCapturable().  This method returns true if there
+        // is a piece of the oposing color, or no piece on the given
+        // position.
+        for(Position positionToCheck : threatenedPositions) {
+            boolean capturable = gameInfo.isCapturable(getColor(), positionToCheck);
+            
+            // if it's a valid move, add it to the list
+            if(capturable) {
+                validMoves.add(positionToCheck);
+            }
+        }
+        
+        // return list of valid moves
+        return validMoves;
+    }
     
     /**
      * Provides a list of positions that are threatened by the piece.  These positions

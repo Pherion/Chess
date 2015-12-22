@@ -36,6 +36,11 @@ public class Pawn extends Piece {
 
     @Override
     public boolean validateMove(Position position) {
+        // make sure the move is on the board
+        if(!GameInfoWrapper.isOnBoard(position)) {
+            return false;
+        }
+        
         // change in position
         int deltaX = Math.abs(getPosition().getX() - position.getX());
         int deltaY = Math.abs(getPosition().getY() - position.getY());
@@ -58,11 +63,18 @@ public class Pawn extends Piece {
             }
         }
 
-        // if we're moving to the left or right, attempt to validate an en passant
-        // otherwise if we're moving too far to the left or right the move is invalid.
+        // if we're moving to the left or right, attempt to validate a capture 
+        // or en passant otherwise if we're moving too far to the left or right
+        // the move is invalid.
         if(deltaX == 1) {
+            // first validate if it is an en passant
             if(!validateEnPassant(position)) {
-                return false;
+                // if not verify a valid capture
+                if(!gameInfo.isCapturable(getColor(), position)) {
+                    // there is neither a valid en passant, or traditonal
+                    // capture at the diagonal position
+                    return false;
+                }
             }
         } else if(deltaX > 1) {
             return false;
@@ -160,6 +172,8 @@ public class Pawn extends Piece {
             validMoves.add(twoSpacesForward);
         }
 
+        // validating en passant also validates a capture to the
+        // left or right
         if(validateMove(enPassantToTheLeft)) {
             validMoves.add(enPassantToTheLeft);
         }
@@ -170,6 +184,48 @@ public class Pawn extends Piece {
 
         // return the valid moves
         return validMoves;
+    }
+
+    @Override
+    public List<Position> getThreatenedPositions() {
+        List<Position> threatenedPositions = new ArrayList<>();
+
+        // determine which direction the pawn should be moving
+        int moveDirection;
+        if(getColor()) {
+            moveDirection = -1;
+        } else {
+            moveDirection = 1;
+        }
+
+        // these represent the ending square of the pawn when capturing, not 
+        // the square threatened by an en passant.
+        Position diagonalLeft = new Position(getPosition().getX() - 1, getPosition().getY() + moveDirection);
+        Position diagonalRight = new Position(getPosition().getX() + 1, getPosition().getY() + moveDirection);
+
+        // validate each en passant
+        if(validateMove(diagonalLeft)) {
+            // add the threatened square to the list
+            threatenedPositions.add(new Position(getPosition().getX() - 1, getPosition().getY()));
+        }
+
+        if(validateMove(diagonalRight)) {
+            // add the threatened square to the list
+            threatenedPositions.add(new Position(getPosition().getX() + 1, getPosition().getY()));
+        }
+        
+        // now we check to see if the pawn can threaten the
+        // ending positions with normal captures
+        if(validateThreatened(diagonalLeft)) {
+            threatenedPositions.add(diagonalLeft);
+        }
+        
+        if(validateThreatened(diagonalRight)) {
+            threatenedPositions.add(diagonalRight);
+        }
+
+        // return the valid moves
+        return threatenedPositions;
     }
     
 }
