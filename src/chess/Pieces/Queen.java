@@ -10,7 +10,6 @@ import java.util.List;
  * @author CarrollFD
  */
 public class Queen extends Piece {
-
     /**
      * Constructs a new Queen
      *
@@ -43,7 +42,7 @@ public class Queen extends Piece {
         int deltaX = Math.abs(getPosition().getX() - position.getX());
         int deltaY = Math.abs(getPosition().getY() - position.getY());
         
-        // check if it is a verticle or horizontal move
+        // check if it is a vertical or horizontal move
         // then check for diagonal
         return ((deltaX == 0 && deltaY != 0) || (deltaY == 0 && deltaX != 0) ||
                 (deltaX == deltaY)) && super.validateMove(position);

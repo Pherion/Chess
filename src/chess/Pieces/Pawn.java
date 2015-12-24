@@ -50,6 +50,11 @@ public class Pawn extends Piece {
             return false;
         }
 
+        // check that the pawn isn't trying to move horizontally
+        if(deltaX > 0 && deltaY == 0) {
+            return false;
+        }
+
         // make sure the pawn is moving the right direction
         if(getColor()) {
             // white pieces move up the board, down in number
@@ -70,7 +75,7 @@ public class Pawn extends Piece {
             // first validate if it is an en passant
             if(!validateEnPassant(position)) {
                 // if not verify a valid capture
-                if(!gameInfo.isCapturable(getColor(), position)) {
+                if(gameInfo.getPieceAt(position) == null || !gameInfo.isCapturable(getColor(), position)) {
                     // there is neither a valid en passant, or traditonal
                     // capture at the diagonal position
                     return false;

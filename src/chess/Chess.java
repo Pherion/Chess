@@ -30,8 +30,7 @@ import chess.renderers.swingRenderer.GameBoardPanel;
 import chess.renderers.StandardOutRenderer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  *
@@ -51,7 +50,8 @@ public class Chess {
         gamePanel.setMoveRequestAction(new MoveRequestAction() {
             @Override
             public void moveRequest(Position startPosition, Position endPosition) {
-                game.getBoard().requestMove(startPosition, endPosition);
+                if(game.getBoard().requestMove(startPosition, endPosition));
+                    System.out.println(game.getBoard().getMoveError());
             }
         });
         
@@ -59,7 +59,7 @@ public class Chess {
         frame.add(gamePanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
     

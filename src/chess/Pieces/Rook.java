@@ -58,7 +58,7 @@ public class Rook extends Piece {
         Position checkPosition;
         boolean validMove;
         
-        // loop through the eight directions the queen can move
+        // loop through the four directions the rook can move
         for(int direction = 0; direction < 4; direction++) {
             // re-set check position
             checkPosition = new Position(getPosition());
@@ -69,7 +69,7 @@ public class Rook extends Piece {
             // keep moving in each direction until an invalid move id
             // detected
             while(validMove) {                
-                // move one space in the apropriate direction
+                // move one space in the appropriate direction
                 switch(direction) {
                     case 0:
                         // north
@@ -98,7 +98,7 @@ public class Rook extends Piece {
                 }
             }
         }
-        
+
         // return the list of valid moves
         return threatenedPositions;
     }
