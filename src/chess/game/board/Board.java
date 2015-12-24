@@ -281,7 +281,7 @@ public class Board {
                 Piece piece = boardGrid.get(y).get(x).getPieceOnSquare();
 
                 // make sure there is a piece here, if not continue the loop
-                if(piece == null) {
+                if(piece == null || piece.isCaptured()) {
                     continue;
                 }
 
@@ -364,45 +364,45 @@ public class Board {
      */
     public boolean isInterveningPiece(Position position1, Position position2) {
         // calculate the deltas
-        int deltaX = Math.abs(position1.getX() - position2.getX());
-        int deltaY = Math.abs(position1.getY() - position2.getY());
+        int deltaX = position2.getX() - position1.getX();
+        int deltaY = position2.getY() - position1.getY();
 
         // default our changes in x and y to 0
         int changeInX = 0;
         int changeInY = 0;
 
         // determine if our changes in x and y are different
-        if(deltaX == deltaY) {
-            // the move is vertical
+        if(Math.abs(deltaX) == Math.abs(deltaY)) {
+            // the move is diagonal
 
             // calculate the change in x
-            if(position1.getX() - position2.getX() > 0) {
-                changeInX = -1;
-            } else if(position1.getX() - position2.getX() < 0) {
+            if(deltaX > 0) {
                 changeInX = 1;
+            } else if(deltaX < 0) {
+                changeInX = -1;
             }
 
             // calculate the change in Y
-            if(position1.getY() - position2.getY() > 0) {
-                changeInY = -1;
-            } else if(position1.getY() - position2.getY() < 0) {
+            if(deltaY > 0) {
                 changeInY = 1;
+            } else if(deltaY < 0) {
+                changeInY = -1;
             }
         } else if(deltaX == 0 ^ deltaY == 0) {
-            // the move is horizontal
+            // the move is horizontal or vertical
 
             // change in X
             if(deltaX > 0) {
-                changeInX = -1;
+                changeInX = 1;
             } else if(deltaX < 0) {
-                changeInY = 1;
+                changeInX = -1;
             }
 
             // change Y
             if(deltaY > 0) {
-                changeInY = -1;
-            } else if (deltaY < 0) {
                 changeInY = 1;
+            } else if (deltaY < 0) {
+                changeInY = -1;
             }
         } else {
             // the move is not vertical or horizontal, it may be a knights move, but either way we don't
@@ -413,7 +413,11 @@ public class Board {
         int x = position1.getX() + changeInX;
         int y = position1.getY() + changeInY;
 
-        while(position2.getX() != x && position2.getY() != y) {
+        while(!(position2.getX() == x && position2.getY() == y)) {
+            if(!gameInfo.isOnBoard(new Position(x, y))) {
+                return false;
+            }
+
             // check if there is a piece at the current spot
             if(boardGrid.get(y).get(x).getPieceOnSquare() != null) {
                 return true;
@@ -533,7 +537,7 @@ public class Board {
             if(colorInCheck != ColorInCheck.none) {
                 throw new IllegalStateException("Both kings in check");
             }
-            
+
             colorInCheck = ColorInCheck.black;
         }
     }
