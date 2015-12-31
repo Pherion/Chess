@@ -29,7 +29,7 @@ public class Board {
 
     // string indicating current move error
     private String moveError = "";
-    
+
     private boolean protectedSquaresInitialized = false;
 
     /**
@@ -43,7 +43,7 @@ public class Board {
 
         // populate the board with starting positions
         initializeBoard();
-        
+
         // we would like to invoke determineProtectedSquares() here, but
         // if this is part of the initialization of the game referenced in
         // the gameInfoWrapper, we will create a loop that can not
@@ -80,7 +80,7 @@ public class Board {
                 boardGrid.get(y).set(x, newSquare);
             }
         }
-        
+
         // we would like to invoke determineProtectedSquares() here, but
         // if this is part of the initilization of the game referenced in
         // the gameInfoWrapper, we will create a loop that can not
@@ -99,22 +99,22 @@ public class Board {
     public boolean requestMove(Position piecePosition, Position targetPosition) {
         // make sure the protected squares have been initialized
         initialize();
-        
+
         Piece pieceToMove = getPieceAt(piecePosition);
         moveError = "";
-        
+
         // make sure there is a piece to move
         if(pieceToMove == null) {
             moveError = "No piece at given position.";
             return false;
         }
-        
+
         // make sure the move is valid
         if(!pieceToMove.validateMove(targetPosition)) {
             moveError = "Invalid move.";
             return false;
         }
-        
+
         // create a test game to verify that it doesn't cause the moving color
         // to be in check
         Game testGame;
@@ -126,34 +126,34 @@ public class Board {
             moveError = "Move results in invalid board state.";
             return false;
         }
-        
+
         // make sure the moving piece isn't placing its king in check.
-        if(testGame.getBoard().getColorInCheck().toBoolean() != null && 
+        if(testGame.getBoard().getColorInCheck().toBoolean() != null &&
                 pieceToMove.getColor() == testGame.getBoard().getColorInCheck().toBoolean()) {
             moveError = "Move places player in check";
             return false;
         }
-        
+
         // we can now safely move the piece
         // get the piece to capture, and capture it if there is one
         Piece pieceToCapture = getPieceAt(targetPosition);
         if(pieceToCapture != null) {
             pieceToCapture.capture();
         }
-        
+
         // remove the piece from it's starting position
         boardGrid.get(piecePosition.getY()).get(piecePosition.getX()).setPieceOnSquare(null);
-        
+
         // place the piece on it's ending position
         boardGrid.get(targetPosition.getY()).get(targetPosition.getX()).setPieceOnSquare(pieceToMove);
-        
+
         // update the piece itself
         pieceToMove.move(targetPosition);
-        
+
         // update the game state
         determineProtectedSquares();
         verifyCheck();
-        
+
         return true;
     }
 
@@ -252,7 +252,7 @@ public class Board {
     private void populateSquares() {
         // re-set the board
         boardGrid = new ArrayList<>();
-        
+
         // loop through rows
         for(int y = 0; y < Board.BOARD_SIZE_Y; y++) {
             // create a new row
@@ -343,7 +343,7 @@ public class Board {
     public boolean threatenedBy(Position position, boolean color) {
         // make sure the protected squares have been initialized
         initialize();
-        
+
         Square square = boardGrid.get(position.getY()).get(position.getX());
 
         return (square.isProtectedByBlack() && color) || (square.isProtectedByWhite() && color);
@@ -454,7 +454,7 @@ public class Board {
     public List<Position> getThreatenedPositions(boolean color) {
         // make sure the protected squares have been initialized
         initialize();
-        
+
         List<Position> threatened = new ArrayList<>();
 
         // loop through the board squares
@@ -486,21 +486,21 @@ public class Board {
     private void verifyCheck() throws IllegalStateException {
         // make sure the protected squares have been initialized
         initialize();
-        
+
         // reset color in check
         colorInCheck = ColorInCheck.none;
-        
+
         // extract the kings
         Piece whiteKing = null;
         Piece blackKing = null;
-        
+
         // loop through the rows
         for(List<Square> list : boardGrid) {
             // loop through the columns
             for(Square square : list) {
                 // extract the piece on the square
                 Piece piece = square.getPieceOnSquare();
-                
+
                 // verify there is a piece
                 if(piece != null) {
                     // check if it's a king
@@ -515,22 +515,22 @@ public class Board {
                 }
             }
         }
-        
+
         // throw an exception if we can't find one of the kings - they have to
         // be there!
         if(whiteKing == null || blackKing == null) {
             throw new IllegalStateException("Unable to locate one of the kings.");
         }
-        
+
         // get the lists of threatened positions
         List<Position> threatenedByWhite = getThreatenedPositions(Piece.WHITE);
         List<Position> threatenedByBlack = getThreatenedPositions(Piece.BLACK);
-        
+
         // check if white is in check
         if(threatenedByBlack.contains(whiteKing.getPosition())) {
             colorInCheck = ColorInCheck.white;
         }
-        
+
         // check if black is in check
         if(threatenedByWhite.contains(blackKing.getPosition())) {
             // if white is also in check we have an invalid state
@@ -549,41 +549,41 @@ public class Board {
      * @param startPosition The starting position
      * @param endPosition The ending position
      */
-    public void forceMove(Position startPosition, Position endPosition) 
+    public void forceMove(Position startPosition, Position endPosition)
             throws IllegalArgumentException {
         // get the starting and ending pieces
         Piece startPiece = getPieceAt(startPosition);
         Piece endPiece = getPieceAt(endPosition);
-        
+
         boolean validMove = true;
-        
+
         // make sure not attempting to capture same color piece
         if(endPiece != null) {
             if(endPiece.getColor() == startPiece.getColor()) {
                 validMove = false;
             }
         }
-        
+
         // if its OK, move the piece
         if(validMove) {
             // capture the end piece if it's there
             if(endPiece != null) {
                 endPiece.capture();
             }
-            
+
             // update the board grid
             boardGrid.get(startPosition.getY()).get(startPosition.getX()).setPieceOnSquare(null);
             boardGrid.get(endPosition.getY()).get(endPosition.getX()).setPieceOnSquare(startPiece);
-            
+
             // update the piece
-            startPiece.move(endPosition);            
+            startPiece.move(endPosition);
         } else {
             throw new IllegalArgumentException("Can not capture a piece "
                     + "of the same color.");
         }
-        
+
         determineProtectedSquares();
-        
+
         // this can throw an exception, but we expect that to be checked
         // for by the caller who is forcing the move
         verifyCheck();
@@ -596,7 +596,7 @@ public class Board {
         return moveError;
     }
 
-    /** 
+    /**
      * @return Provides the colorInCheck flag.
      */
     public ColorInCheck getColorInCheck() {
