@@ -44,7 +44,7 @@ public class  Knight extends Piece {
         int deltaY = Math.abs(getPosition().getY() - position.getY());
         
         // make sure one delta is 1, and the other is 2
-        if((deltaX == 1 ^ deltaY == 1) && (deltaX == 2 ^ deltaY == 2)) {
+        if(!(deltaX == 1 ^ deltaY == 1) || !(deltaX == 2 ^ deltaY == 2)) {
             return false;
         }
         
