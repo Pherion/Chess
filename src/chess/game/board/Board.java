@@ -45,9 +45,9 @@ public class Board {
         initializeBoard();
         
         // we would like to invoke determineProtectedSquares() here, but
-        // if this is part of the initilization of the game referenced in
+        // if this is part of the initialization of the game referenced in
         // the gameInfoWrapper, we will create a loop that can not
-        // execute without error.  The flag protectdSquaresInitialized
+        // execute without error.  The flag protectedSquaresInitialized
         // will determine if this initialization needs to occur.
     }
 
