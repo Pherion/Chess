@@ -22,6 +22,22 @@ public class Move {
     private Position startPositionTwo;
     private Position endPositionTwo;
 
+    public Move(PieceType type, Position startPosition, Position endPosition) {
+        this.type = type;
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+    }
+
+    public Move(PieceType type, Position startPosition, Position endPosition, PieceType typeTwo, Position startPositionTwo, Position endPositionTwo) {
+        this.type = type;
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+
+        this.typeTwo = typeTwo;
+        this.startPositionTwo = startPositionTwo;
+        this.endPositionTwo = endPositionTwo;
+    }
+
     /**
      * Copy Constructor
      *
